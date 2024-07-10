@@ -45,6 +45,7 @@ jobs:
         with:
           bins: cross
           channel: stable
+          targets: ${{ matrix.rust-target }}
           cache: false
 
       - if: matrix.rust-target == 'x86_64-pc-windows-msvc' || matrix.rust-target == 'aarch64-pc-windows-msvc'
