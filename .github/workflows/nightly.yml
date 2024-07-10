@@ -20,20 +20,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: windows-latest
-            dotnet-runtime: win-x64
+          - dotnet-runtime: win-x64
             rust-target: x86_64-pc-windows-msvc
-          - os: windows-latest
-            dotnet-runtime: win-arm64
+          - dotnet-runtime: win-arm64
             rust-target: aarch64-pc-windows-msvc
-          - os: ubuntu-latest
-            dotnet-runtime: linux-x64
-            rust-target: x86_64-unknown-linux-musl
-          - os: ubuntu-latest
-            dotnet-runtime: linux-arm64
-            rust-target: aarch64-unknown-linux-musl
-          - os: macos-latest
-            dotnet-runtime: osx-arm64
+          - dotnet-runtime: linux-x64
+            rust-target: x86_64-unknown-linux-gnu
+          - dotnet-runtime: linux-arm64
+            rust-target: aarch64-unknown-linux-gnu
+          - dotnet-runtime: osx-arm64
             rust-target: aarch64-apple-darwin
     runs-on: windows-latest
     defaults:
@@ -48,33 +43,25 @@ jobs:
 
       - uses: moonrepo/setup-rust@v1
         with:
+          bins: cross
           channel: stable
-          targets: ${{ matrix.rust-target }}
           cache: false
 
-      #- if: matrix.rust-target == 'aarch64-unknown-linux-gnu'
-      #  run: |
-      #   sudo sed -i -e 's/deb mirror/deb [arch=amd64] mirror/g' /etc/apt/sources.list
-      #   echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/arm64.list
-      #   echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-updates main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/arm64.list
-      #   echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-backports main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/arm64.list
-      #   echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-security main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/arm64.list
-      #   sudo dpkg --add-architecture arm64
-      #   sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu
+      - if: matrix.rust-target == 'x86_64-pc-windows-msvc' || matrix.rust-target == 'aarch64-pc-windows-msvc'
+        run: cargo build -r --target ${{ matrix.rust-target }}
+        working-directory: src/WingetCreateCore/Common/Msi/rust-msi
 
-      # CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER="aarch64-linux-gnu-gcc"
-      - run: cargo build -r --target ${{ matrix.rust-target }}
-        env:
-          CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER: rust-lld
+      - if: matrix.rust-target != 'x86_64-pc-windows-msvc' && matrix.rust-target != 'aarch64-pc-windows-msvc'
+        run: cross build -r --target ${{ matrix.rust-target }}
         working-directory: src/WingetCreateCore/Common/Msi/rust-msi
 
       - run: dotnet publish ./WingetCreateCLI.csproj -c Release -r ${{ matrix.dotnet-runtime }} --output ./output
         working-directory: src/WingetCreateCLI
 
-      - if: matrix.os != 'windows-latest'
+      - if: matrix.dotnet-runtime != 'win-x64' && matrix.dotnet-runtime != 'win-arm64'
         run: mv src/WingetCreateCLI/output/WingetCreateCLI ./wingetcreate-${{ matrix.dotnet-runtime }}
 
-      - if: matrix.os == 'windows-latest'
+      - if: matrix.dotnet-runtime == 'win-x64' || matrix.dotnet-runtime == 'win-arm64'
         run: mv src/WingetCreateCLI/output/WingetCreateCLI.exe ./wingetcreate-${{ matrix.dotnet-runtime }}.exe
 
       - name: Delete old release 🗑️
