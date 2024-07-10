@@ -43,10 +43,11 @@ jobs:
 
       - uses: moonrepo/setup-rust@v1
         with:
-          bins: cross
           channel: stable
           targets: ${{ matrix.rust-target }}
           cache: false
+
+      - run: cargo install cross --git https://github.com/cross-rs/cross
 
       - if: matrix.rust-target == 'x86_64-pc-windows-msvc' || matrix.rust-target == 'aarch64-pc-windows-msvc'
         run: cargo build -r --target ${{ matrix.rust-target }}
