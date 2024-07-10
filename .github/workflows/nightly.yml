@@ -28,10 +28,10 @@ jobs:
             rust-target: aarch64-pc-windows-msvc
           - os: ubuntu-latest
             dotnet-runtime: linux-x64
-            rust-target: x86_64-unknown-linux-gnu
+            rust-target: x86_64-unknown-linux-musl
           - os: ubuntu-latest
             dotnet-runtime: linux-arm64
-            rust-target: aarch64-unknown-linux-gnu
+            rust-target: aarch64-unknown-linux-musl
           - os: macos-latest
             dotnet-runtime: osx-arm64
             rust-target: aarch64-apple-darwin
@@ -62,7 +62,7 @@ jobs:
       #   sudo dpkg --add-architecture arm64
       #   sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu
 
-      # CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER="aarch64-linux-gnu-gcc"
+      # CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER="aarch64-linux-gnu-gcc"
       - run: cargo build -r --target ${{ matrix.rust-target }}
         env:
           CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER: rust-lld
