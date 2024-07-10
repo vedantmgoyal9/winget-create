@@ -63,6 +63,8 @@ jobs:
 
       # CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER="aarch64-linux-gnu-gcc"
       - run: cargo build -r --target ${{ matrix.rust-target }}
+        env:
+          CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER: rust-lld
         working-directory: src/WingetCreateCore/Common/Msi/rust-msi
 
       - run: dotnet publish ./WingetCreateCLI.csproj -c Release -r ${{ matrix.dotnet-runtime }} --output ./output
